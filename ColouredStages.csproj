@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Dev.Isekai.RogueTower.ColouredStages</AssemblyName>
+    <Description>Colours each tile a distinctive colour based on the stage it was generated in</Description>
+    <Version>0.1.0</Version>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <LangVersion>10</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Dev.Isekai.RogueTower.ColouredStages</RootNamespace>
+    <Product>🎨 Coloured Stages</Product>
+
+    <PluginPublishDirectory>$(ROGUE_TOWER_HOME)\BepInEx\plugins</PluginPublishDirectory>
+    <ScriptPublishDirectory>$(ROGUE_TOWER_HOME)\BepInEx\scripts</ScriptPublishDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.17" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.1.0" />
+    <PackageReference Include="UnityEngine.Modules" Version="[2021.1.0]" IncludeAssets="compile" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>assemblies\Assembly-CSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Folder.DotSettings" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(CI)' != 'true'">
+    <MakeDir Directories="assemblies" />
+
+    <Copy SourceFiles="$(ROGUE_TOWER_HOME)\Rogue Tower_Data\Managed\Assembly-CSharp.dll" DestinationFolder="assemblies" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(CI)' != 'true'">
+    <MakeDir Directories="$(PluginPublishDirectory)" />
+    <MakeDir Directories="$(ScriptPublishDirectory)" />
+
+    <!-- BepInEx Plugin -->
+    <!--<Copy SourceFiles="$(OutDir)\$(AssemblyName).dll" DestinationFolder="$(PluginPublishDirectory)" SkipUnchangedFiles="true" />-->
+    <!--<Delete Files="$(ScriptPublishDirectory)\$(AssemblyName).dll" />-->
+
+    <!-- Hot-loadable Script -->
+    <Copy SourceFiles="$(OutDir)\$(AssemblyName).dll" DestinationFolder="$(ScriptPublishDirectory)" SkipUnchangedFiles="true" />
+    <Delete Files="$(PluginPublishDirectory)\$(AssemblyName).dll" />
+  </Target>
+</Project>
